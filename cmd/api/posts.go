@@ -97,8 +97,8 @@ func (app *application) deletePostHandler(w http.ResponseWriter, r *http.Request
 }
 
 type UpdatePostPayload struct {
-	Title   string `json:"title"`
-	Content string `json:"content"`
+	Title   string  `json:"title"`
+	Content *string `json:"content"`
 }
 
 func (app *application) updatePostHandler(w http.ResponseWriter, r *http.Request) {
@@ -107,6 +107,13 @@ func (app *application) updatePostHandler(w http.ResponseWriter, r *http.Request
 	if err := readJSON(w, r, &payload); err != nil {
 		app.badRequestResponse(w, r, err)
 		return
+	}
+
+	if payload.Title != "" {
+		post.Title = payload.Title
+	}
+	if payload.Content != nil {
+		post.Content = *payload.Content
 	}
 
 	if err := app.store.Posts.Update(r.Context(), post); err != nil {
