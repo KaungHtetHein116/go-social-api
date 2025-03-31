@@ -48,7 +48,7 @@ func (app *application) createPostHandler(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	if err := writeJSON(w, http.StatusCreated, post); err != nil {
+	if err := app.jsonResponse(w, http.StatusCreated, post); err != nil {
 		app.internalServerError(w, r, err)
 		return
 	}
@@ -66,7 +66,7 @@ func (app *application) getPostHandler(w http.ResponseWriter, r *http.Request) {
 
 	post.Comments = comments
 
-	if err := writeJSON(w, http.StatusOK, post); err != nil {
+	if err := app.jsonResponse(w, http.StatusOK, post); err != nil {
 		app.internalServerError(w, r, err)
 		return
 	}
@@ -97,7 +97,7 @@ func (app *application) deletePostHandler(w http.ResponseWriter, r *http.Request
 }
 
 type UpdatePostPayload struct {
-	Title   string  `json:"title"`
+	Title   *string `json:"title"`
 	Content *string `json:"content"`
 }
 
@@ -109,8 +109,8 @@ func (app *application) updatePostHandler(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	if payload.Title != "" {
-		post.Title = payload.Title
+	if payload.Title != nil {
+		post.Title = *payload.Title
 	}
 	if payload.Content != nil {
 		post.Content = *payload.Content
@@ -121,7 +121,7 @@ func (app *application) updatePostHandler(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	if err := writeJSON(w, http.StatusOK, post); err != nil {
+	if err := app.jsonResponse(w, http.StatusOK, post); err != nil {
 		app.internalServerError(w, r, err)
 		return
 	}
