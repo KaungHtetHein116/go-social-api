@@ -9,7 +9,7 @@ type User struct {
 	ID         int    `json:"id"`
 	Username   string `json:"username"`
 	Email      string `json:"email"`
-	Password   string `json:"_"`
+	Password   string `json:"-"`
 	Created_At string `json:"created_at"`
 }
 
@@ -35,4 +35,30 @@ func (s *UserStore) Create(ctx context.Context, user *User) error {
 	}
 
 	return nil
+}
+
+func (s *UserStore) GetByUserID(ctx context.Context, userID int) (*User, error) {
+	query := `
+		SELECT id, username, email, created_at
+		FROM users
+		WHERE id = $1
+	`
+
+	user := &User{}
+	if err := s.db.QueryRowContext(ctx, query, userID).Scan(
+		&user.ID,
+		&user.Username,
+		&user.Email,
+		&user.Created_At,
+	); err != nil {
+		switch err {
+		case sql.ErrNoRows:
+			return nil, ErrRecordNotFound
+
+		default:
+			return nil, err
+		}
+	}
+
+	return user, nil
 }
